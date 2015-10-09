@@ -20,16 +20,17 @@ class Bolillero
     private $sorteado = false;
     private $numerosSorteados = array();
     private $momento = null;
-    private $generados = false;
     private $hash = null;
+    private $semilla = null;
+    private $valorExterno = null;
 
-    public function __construct($mayorNumero = null)
+    public function __construct($valorExterno, $mayorNumero = null)
     {
         $this->numeros = array();
         $this->sorteado = false;
         $this->numerosSorteados = array();
         $this->momento = null;
-        $this->generados = false;
+        $this->valorExterno = $valorExterno;
         if (null !== $mayorNumero)
         {
             $this->generarNumerosHasta($mayorNumero);
@@ -42,78 +43,59 @@ class Bolillero
         {
             throw new \InvalidArgumentException('El "mayor numero" (valor ' . $mayorNumero . ') debe ser un numero mayor o igual a 1.');
         }
-        if (!empty($this->numeros))
+        if ($this->getSorteado())
         {
-            throw new \LogicException('No pueden generarse los numeros porque ya existen algunos en el bolillero.');
+            throw new \LogicException('No pueden generarse números porque ya se realizó un sorteo en este bolillero.');
         }
         $this->numeros = range(1, $mayorNumero);
-        $this->generados = true;
     }
     
-    public function agregarNumero($unNumero)
+    private function generarSemilla()
     {
-        if (!is_int($unNumero))
+        if (null === $this->getValorExterno())
         {
-            throw new \InvalidArgumentException('El valor recibido debe ser un numero.');
+            throw new \LogicException('Falta un valor externo para generar la semilla.');
         }
-        if ($this->generados)
-        {
-            throw new \LogicException('No se puede agregar un numero a un conjunto de numeros generados.');
-        }
-        if (in_array($unNumero, $this->numeros))
-        {
-            throw new \LogicException('El numero ingresado ya se encuentra en el bolillero.');
-        }
-        $this->numeros[] = $unNumero;
+        $this->semilla = (microtime(true) * getmypid()) ^  (lcg_value() * 1000000);
+        mt_srand($this->semilla + $this->valorExterno);
     }
-
-    private function agregarNumeroSorteado($unNumero)
+    
+    public function getSemilla()
     {
-        $this->numerosSorteados[] = $unNumero;
+        return $this->semilla;
     }
-
+    
+    public function getValorExterno()
+    {
+        return $this->valorExterno;
+    }
+    
     public function sortear()
     {
         if ($this->getSorteado())
         {
             throw new \LogicException('Ya se realizó un sorteo en este bolillero');
         }
-        while ($this->quedanNumeros()) {
-            $this->sacarNumero();
+        if (empty($this->numeros))
+        {
+            throw new \LogicException('No hay números para sortear en este bolillero');
         }
+        $this->inicioSorteo();
+        $hasta = count($this->numerosSorteados) - 1;
+        for ($i = 0; $i < $hasta; $i++)
+        {
+            $j = mt_rand($i, $hasta);
+            self::intercambiar($this->numerosSorteados[$i], $this->numerosSorteados[$j]); //intercambio de valores
+        }
+        $this->finSorteo();
 
         return $this->getNumerosSorteados();
     }
 
-    public function quedanNumeros()
-    {
-
-        return (!empty($this->numeros));
-    }
-
-    public function sacarNumero()
-    {
-        if (!$this->quedanNumeros())
-        {
-            throw new UnderflowException('No hay numeros en el bolillero');
-        }
-        $cantidadDeNumeros = count($this->numeros); //Cantidad de bolillas restantes
-        $posicion = mt_rand(0, $cantidadDeNumeros - 1); //Giro el bolillero: Elijo una posición al azar (Mersenne Twister: http://php.net/manual/es/function.mt-rand.php)
-        $numeroObtenido = $this->numeros[$posicion]; //Obtengo el número de la bolilla de esa posición
-        $this->quitarNumero($posicion); //Quito ese número ("bolilla") del bolillero
-        $this->agregarNumeroSorteado($numeroObtenido); //Guardo el resultado a la lista de numeros sorteados
-        if (1 === $cantidadDeNumeros)
-        {
-            $this->finSorteo();
-        }
-
-        return $numeroObtenido;
-    }
-
-    private function quitarNumero($posicion)
-    {
-        unset($this->numeros[$posicion]); // Quito esa "bolilla" del bolillero
-        $this->numeros = array_values($this->numeros); // Reacomodo el hueco que generó el número que saqué
+    private static function intercambiar(&$x,&$y) {
+        $tmp=$x;
+        $x=$y;
+        $y=$tmp;
     }
     
     public function getNumerosSorteados()
@@ -133,7 +115,13 @@ class Bolillero
 
         return $this->sorteado;
     }
-
+    
+    private function inicioSorteo()
+    {
+        $this->generarSemilla();
+        $this->numerosSorteados = array_values($this->numeros);
+    }
+    
     private function finSorteo()
     {
         $this->marcarSorteado();
@@ -143,7 +131,7 @@ class Bolillero
     
     private function generarHash()
     {
-        $this->hash = sha1($this->getMomento().';'.implode(',', $this->getNumerosSorteados())); //http://stackoverflow.com/questions/1846202/php-how-to-generate-a-random-unique-alphanumeric-string/13733588#13733588
+        $this->hash = sha1($this->getMomento().';'.$this->getSemilla().';'.$this->getValorExterno().';'.implode(',', $this->getNumerosSorteados()));
     }
     
     public function getHash()
@@ -162,12 +150,12 @@ class Bolillero
 
     private function marcarMomento()
     {
-        $this->momento = time();
+        $this->momento = microtime(true);
     }
     
     public function __toString()
     {
-        return implode(',', $this->getNumerosSorteados());
+        return implode(' ', $this->getNumerosSorteados());
     }
 
 }
