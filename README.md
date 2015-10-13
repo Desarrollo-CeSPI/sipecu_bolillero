@@ -3,10 +3,10 @@ Proyecto del bolillero virtual utilizado para sorteos
 
 
 ## Ejemplo de uso
-Sortear 10 números (del 1 al 10), con un valor externo 98765 (elegido al momento del sorteo):
+Sortear 10 números (del 1 al 10):
 
 ```php
-$bolillero = new \Cespi\SipecuBundle\Util\Bolillero(98765, 10);
+$bolillero = new \Cespi\SipecuBundle\Util\Bolillero(10);
 $sorteados = $bolillero->sortear();
 var_dump($sorteados);
 ```
@@ -15,19 +15,9 @@ var_dump($sorteados);
 array(10) { [0]=> int(2) [1]=> int(6) [2]=> int(3) [3]=> int(7) [4]=> int(4) [5]=> int(9) [6]=> int(8) [7]=> int(5) [8]=> int(10) [9]=> int(1) } 
 ```
 
-Para auditoría:
+El hash se podría formar de la siguiente manera:
 ```php
-echo 'Ultimo sorteo: Momento: '.$bolillero->getMomento().' ['.$bolillero->getHash().'] Semilla: '.$bolillero->getSemilla().' Valor externo: '.$bolillero->getValorExterno();
-```
-
-Imprimirá (para otro ejemplo de sorteo):
-```
-Ultimo sorteo: Momento: 1444420060.0174 [7b02ca90c57f9ce544cfc45d78b82247858544b3] Semilla: 26832991562518 Valor externo: 29827
-```
-
-El hash se forma de la siguiente manera:
-```php
-sha1($this->getMomento().';'.$this->getSemilla().';'.$this->getValorExterno().';'.implode(',', $this->getNumerosSorteados()));
+sha1($bolillero->getMomento().';'.$bolillero->getSemilla().';'.implode(',', $bolillero->getNumerosSorteados()));
 ```
 
 # Tests
@@ -53,3 +43,19 @@ php test/generator/generate-numbers.php -h
 El comando anterior mostrará ayuda de cómo utilizarlo. Si no se utilizan
 parámetros, entonces se producen 100 lanzamientos con semilla (cero) de cinco
 números cada sorteo
+
+### Generar salidas
+
+* Rango 10 (0..9): 2.000.000 de sorteos
+* Rango 30 (0..29): 10.000.000 de sorteos
+* Rango 280 (0..279): 10.000.000 de sorteos
+* Rango 780 (0..779): 5.000.000 de sorteos
+* Rango 1500 (0..1499): 1.000.000 de sorteos
+
+```
+php test/generator/generate-numbers.php -n 10 -c 2000000 > res_20_2.000.000.txt
+php test/generator/generate-numbers.php -n 30 -c 10000000 > res_30_10.000.000.txt
+php test/generator/generate-numbers.php -n 280 -c 10000000 > res_280_10.000.000.txt
+php test/generator/generate-numbers.php -n 780 -c 5000000 > res_280_5.000.000.txt
+php test/generator/generate-numbers.php -n 1500 -c 1000000 > res_1500_1.000.000.txt
+```

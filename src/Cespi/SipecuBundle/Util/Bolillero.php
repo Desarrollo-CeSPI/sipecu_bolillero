@@ -19,18 +19,13 @@ class Bolillero
     private $numeros = array();
     private $sorteado = false;
     private $numerosSorteados = array();
-    private $momento = null;
-    private $hash = null;
     private $semilla = null;
-    private $valorExterno = null;
 
-    public function __construct($valorExterno, $mayorNumero = null)
+    public function __construct($mayorNumero = null)
     {
         $this->numeros = array();
         $this->sorteado = false;
         $this->numerosSorteados = array();
-        $this->momento = null;
-        $this->valorExterno = $valorExterno;
         if (null !== $mayorNumero)
         {
             $this->generarNumerosHasta($mayorNumero);
@@ -47,17 +42,20 @@ class Bolillero
         {
             throw new \LogicException('No pueden generarse números porque ya se realizó un sorteo en este bolillero.');
         }
+        if (!empty($this->numeros))
+        {
+            throw new \LogicException('No pueden generarse números porque ya existen en este bolillero.');
+        }
         $this->numeros = range(1, $mayorNumero);
     }
     
     private function generarSemilla()
     {
-        if (null === $this->getValorExterno())
-        {
-            throw new \LogicException('Falta un valor externo para generar la semilla.');
-        }
-        $this->semilla = (microtime(true) * getmypid()) ^  (lcg_value() * 1000000);
-        mt_srand($this->semilla + $this->valorExterno);
+        list($microsegundos, $segundos) = explode(' ', microtime()); //Flotante: "segundos microsegundos" (6 decimales de precisión)
+        $segundos = (int) ($segundos * 1000000); // 6 decimales de microsegundos
+        $microsegundos = (int) ($microsegundos * 1000000);
+        $this->semilla = $segundos + $microsegundos; // microsegundos hasta la fecha (entero)
+        mt_srand($this->semilla); //El valor del parámetro entero está en 32 bits, por lo que tomará los últimos 32 bits del valor (en 64bits)
     }
     
     public function getSemilla()
@@ -65,11 +63,7 @@ class Bolillero
         return $this->semilla;
     }
     
-    public function getValorExterno()
-    {
-        return $this->valorExterno;
-    }
-    
+   
     public function sortear()
     {
         if ($this->getSorteado())
@@ -104,12 +98,6 @@ class Bolillero
         return $this->numerosSorteados;
     }
 
-    public function getMomento()
-    {
-
-        return $this->momento;
-    }
-
     public function getSorteado()
     {
 
@@ -125,32 +113,11 @@ class Bolillero
     private function finSorteo()
     {
         $this->marcarSorteado();
-        $this->marcarMomento();
-        $this->generarHash();
     }
     
-    private function generarHash()
-    {
-        $this->hash = sha1($this->getMomento().';'.$this->getSemilla().';'.$this->getValorExterno().';'.implode(',', $this->getNumerosSorteados()));
-    }
-    
-    public function getHash()
-    {
-        if (!$this->getSorteado())
-        {
-            throw new \LogicException('No se puede obtener el token si no se finalizó el sorteo.');
-        }
-        return $this->hash;
-    }
-
     private function marcarSorteado()
     {
         $this->sorteado = true;
-    }
-
-    private function marcarMomento()
-    {
-        $this->momento = microtime(true);
     }
     
     public function __toString()
