@@ -29,3 +29,27 @@ El hash se forma de la siguiente manera:
 ```php
 sha1($this->getMomento().';'.$this->getSemilla().';'.$this->getValorExterno().';'.implode(',', $this->getNumerosSorteados()));
 ```
+
+# Tests
+
+## De Unidad
+
+Para correr los tests de unidad:
+
+```
+php lib/phpunit-4.8.10.phar --bootstrap test/autoload.php test/unit/Bolillero
+```
+
+## Generar salida a testear distribución de aleatoriedad
+
+Se provee de un script para generar la salida a ser utilizada como entrada en
+sistemas que permiten testear la distribución de números generada en forma
+aleatoria:
+
+```
+php test/generator/generate-numbers.php -h
+```
+
+El comando anterior mostrará ayuda de cómo utilizarlo. Si no se utilizan
+parámetros, entonces se producen 100 lanzamientos con semilla (cero) de cinco
+números cada sorteo
