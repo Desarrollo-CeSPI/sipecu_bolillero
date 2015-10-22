@@ -15,9 +15,10 @@ var_dump($sorteados);
 array(10) { [0]=> int(2) [1]=> int(6) [2]=> int(3) [3]=> int(7) [4]=> int(4) [5]=> int(9) [6]=> int(8) [7]=> int(5) [8]=> int(10) [9]=> int(1) } 
 ```
 
-El hash se podría formar de la siguiente manera:
+El hash de validación del sorteo se podría formar de la siguiente manera:
 ```php
-sha1($bolillero->getMomento().';'.$bolillero->getSemilla().';'.implode(',', $bolillero->getNumerosSorteados()));
+$momento = $sorteo->getMomento()->getTimestamp(); // El timestamp del mometo que finaliza y se guarda el sorteo
+sha1($momento.';'.$bolillero->getSemilla().';'.implode(',', $bolillero->getNumerosSorteados()));
 ```
 
 # Tests
