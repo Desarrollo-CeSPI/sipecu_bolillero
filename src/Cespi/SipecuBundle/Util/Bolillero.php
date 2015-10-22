@@ -51,8 +51,11 @@ class Bolillero
     
     private function generarSemilla()
     {
-        $this->semilla = microtime(true); // microsegundos hasta la fecha (float: "segundos.microsegundos", para arquitecturas de 32 y 64 bits, ya que el tamaño del entero en microsegundos con 6 decimales de precisión no entra en 32bits, y el valor variaría dependiendo de la arquitectura)
-        mt_srand($this->semilla); //El valor del parámetro entero está en 32 bits, por lo que tomará los últimos 32 bits del valor (de float)
+        list($microsegundos, $segundos) = explode(' ', microtime()); //Flotante: "segundos microsegundos" (6 decimales de precisión)
+        $segundos = (int) ($segundos * 1000000); // 6 decimales de microsegundos
+        $microsegundos = (int) ($microsegundos * 1000000);
+        $this->semilla = $segundos + $microsegundos; // microsegundos hasta la fecha (entero)
+        mt_srand($this->semilla); //El valor del parámetro entero está en 32 bits, por lo que tomará los últimos 32 bits del valor (en 64bits)
     }
     
     public function getSemilla()
@@ -77,7 +80,7 @@ class Bolillero
         {
             $j = mt_rand($i, $hasta);
             self::intercambiar($this->numerosSorteados[$i], $this->numerosSorteados[$j]); //intercambio de valores
-            }
+        }
         $this->finSorteo();
 
         return $this->getNumerosSorteados();
