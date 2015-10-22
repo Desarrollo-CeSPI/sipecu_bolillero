@@ -54,9 +54,9 @@ números cada sorteo
 * Rango 1500 (0..1499): 1.000.000 de sorteos
 
 ```
-php test/generator/generate-numbers.php -n 10 -c 2000000 > res_20_2.000.000.txt
+php test/generator/generate-numbers.php -n 10 -c 2000000 > res_10_2.000.000.txt
 php test/generator/generate-numbers.php -n 30 -c 10000000 > res_30_10.000.000.txt
 php test/generator/generate-numbers.php -n 280 -c 10000000 > res_280_10.000.000.txt
-php test/generator/generate-numbers.php -n 780 -c 5000000 > res_280_5.000.000.txt
+php test/generator/generate-numbers.php -n 780 -c 5000000 > res_780_5.000.000.txt
 php test/generator/generate-numbers.php -n 1500 -c 1000000 > res_1500_1.000.000.txt
 ```
