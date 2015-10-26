@@ -27,10 +27,7 @@ class Bolillero
     private $sorteado = false;
     private $numerosSorteados = array();
     private $semilla = null;
-<<<<<<< HEAD
     private $strMicrotime = null;
-=======
->>>>>>> 1a44f39dc6d302f281fb385159ee8d8b928bede8
 
     public function __construct($mayorNumero = null)
     {
@@ -63,10 +60,7 @@ class Bolillero
     private function generarSemilla()
     {
         list($microsegundos, $segundos) = explode(' ', microtime()); //Flotante: "segundos microsegundos" (6 decimales de precisión)
-<<<<<<< HEAD
         $this->strMicrotime = $segundos .';'. $microsegundos;
-=======
->>>>>>> 1a44f39dc6d302f281fb385159ee8d8b928bede8
         $segundos = (int) ($segundos * 1000000); // 6 decimales de microsegundos
         $microsegundos = (int) ($microsegundos * 1000000);
         $this->semilla = $segundos + $microsegundos; // microsegundos hasta la fecha (entero)
@@ -77,15 +71,11 @@ class Bolillero
     {
         return $this->semilla;
     }
-<<<<<<< HEAD
 
     public function getStrMicrotime()
     {
         return $this->strMicrotime;
     }
-=======
-    
->>>>>>> 1a44f39dc6d302f281fb385159ee8d8b928bede8
    
     public function sortear()
     {
