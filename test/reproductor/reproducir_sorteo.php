@@ -68,16 +68,21 @@ foreach (array('s', 'n', 'u') as $opcion)
 require_once("BolilleroReproductor.php");
 
 //El tamaño de la semilla es de 32 bits (implementación estándar MT19937 https://en.wikipedia.org/wiki/Mersenne_Twister) por lo que se utilizarán los últimos 32 bits.
-
+$semilla = (int) (((int) $segundos * 1000000) + $microsegundos);
 if ($bits == 32) //En versiones de PHP de 32 bits (es decir si el web en donde se corrió el sorteo fue de 32 bits)
 {
   if (PHP_INT_SIZE > 4) //Verifico el tamaño de los enteros de la versión en la cual se está corriendo la prueba
   {  
-    $semilla = ($segundos * 1000000 + $microsegundos) | 0xFFFFFFFF00000000; 
-  }
-  else
-  {
-    $semilla = (int) (((int) $segundos * 1000000) + $microsegundos);
+    //Corrección en verificación de 64 bits
+    $semilla_tmp = $semilla & 0x00000000FFFFFFFF;
+    if (strlen(decbin($semilla_tmp)) == 32)
+    {
+      $semilla = $semilla | 0xFFFFFFFF00000000;
+    }
+    else
+    {
+      $semilla = $semilla_tmp;  
+    }
   }
 }
 else //En versiones de PHP de 64 bits (es decir si el web en donde se corrió el sorteo fue de 64 bits)
@@ -87,7 +92,6 @@ else //En versiones de PHP de 64 bits (es decir si el web en donde se corrió el
     printf("Es necesaria una versión de PHP de %s bits\n\n", $bits);
     exit(1);
   }
-  $semilla = ($segundos * 1000000 + $microsegundos); 
 }
 $bolillero = new BolilleroReproductor($semilla, $numeros);
 $numeros_sorteados = $bolillero->sortear();
