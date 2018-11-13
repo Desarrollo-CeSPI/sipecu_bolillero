@@ -76,7 +76,7 @@ Donde:
   * -n número: especifica la cantidad de numeros a sortear.
   * -b 32 o 64: Bits de la versión de php. Por defecto 32 (versión utilizada en el servidor).
   
-IMPORTANTE: La versión de PHP actual en donde se correrá el sorteo es de 32 bits.
+IMPORTANTE: La versión de PHP en donde se corre el sorteo es <= 5.6 (de 32 bits). Puede cambiar con versiones mayores a 7.0.
 
 ### Ejemplo
 Por ejemplo, para verificar un sorteo de 9 números, que se realice el día 28 de Octubre a las 16:44:01 (GMT, sería menos 3 horas según la zona horaria de Buenos Aires, Argentina) su timestamp será 1446050641 y a los 57433 microsegundos (una millonésima de segundo). Debería correrse:
